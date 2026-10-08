@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FlatList, Image, Pressable, StyleSheet, Switch, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
 
 
 export type kieuDLXe={
@@ -19,8 +19,16 @@ function ListProduct({navigation}:any) {
 
   const [dsXe, setDsXe]= useState<kieuDLXe[]>([])
   const [chon, setChon]= useState("All")
-  const dsXeHT= chon=="All"? dsXe : dsXe.filter(xe=>xe.genre==chon)
-  
+
+  const [search,setSearch]= useState("")
+  const dsXeHT= (chon=="All"? dsXe: dsXe.filter(xe=>xe.genre==chon))
+            .filter(xe=> xe.title.toLowerCase().includes(search.toLowerCase()))
+
+  // const dsXeHT= dsXe
+  //           .filter(xe => chon == "All" ? true : xe.genre == chon)
+  //           .filter(xe=> xe.title.toLowerCase().includes(search.toLowerCase()))
+
+
   const [loading,setLoading]= useState(true)
   useEffect(()=>{
     fetch("https://6ab224c45b9b60f39d345cdd.mockapi.io/bicyclestore")
@@ -32,6 +40,8 @@ function ListProduct({navigation}:any) {
 
   return (
     <View style={styles.container}>
+              {/* hoặc onChangeText={setSearch} - ở đây nó v */}
+      <TextInput onChangeText={(val)=>{setSearch(val)}} placeholder='Nhap ten tim' style={{borderColor:"gray",borderWidth:1}}></TextInput>
       <View>
         <Text>The world's Best bike</Text>
         <View style={{flexDirection:"row", gap:15, justifyContent:"space-around"}}>
@@ -49,7 +59,9 @@ function ListProduct({navigation}:any) {
       
       <Switch value={cot} onValueChange={(vlmoi)=>setCot(vlmoi)}></Switch>
 
-      <FlatList data={dsXeHT} key={cot? "1cot" : "2cot"} numColumns={cot? 2:1} renderItem={({item})=>(
+      {loading? (<ActivityIndicator></ActivityIndicator>)
+      :
+      (<FlatList data={dsXeHT} key={cot? "1cot" : "2cot"} numColumns={cot? 2:1} renderItem={({item})=>(
         <Pressable style={styles.cardWrap} onPress={()=>{navigation.navigate("Detail",{id: item.id.toString()})}}>
           <View style={styles.card}>
           <Image style={styles.img} source={{uri: item.poster}}/>
@@ -62,7 +74,7 @@ function ListProduct({navigation}:any) {
 
       >
 
-      </FlatList>
+      </FlatList>)}
 
     </View>
   )
